@@ -1,5 +1,5 @@
 # PF-Net-Point-Fractal-Network
-This is the Pytorch implement of CVPR2020 PF-Net: Point Fractal Network for 3D Point Cloud Completiont. 
+This is the Pytorch implement of CVPR2020 PF-Net: Point Fractal Network for 3D Point Cloud Completion. 
 
 This repository is still under constructions.
 
