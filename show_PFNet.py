@@ -97,38 +97,6 @@ for i, data in enumerate(test_dataloader, 0):
 #    choice =random.sample(points,5)
 #    choice = [torch.Tensor([1,0,0]),torch.Tensor([0,0,1]),torch.Tensor([1,0,1]),torch.Tensor([-1,0,0]),torch.Tensor([-1,1,0])]
     choice = [torch.Tensor([0.1,0,0])]
-#    if target[0] ==0:
-#        choice = [torch.Tensor([0,0,1]),torch.Tensor([-1,0,0]),torch.Tensor([1,0,0])]
-#    elif target[0] == 1:
-#        choice = [torch.Tensor([0,1,0]),torch.Tensor([0,0,1])]
-#    elif target[0] == 2:
-#        choice = [torch.Tensor([0,1,0]),torch.Tensor([1,0,0])]
-#    elif target[0] == 3:
-#        choice = [torch.Tensor([0,2,0]),torch.Tensor([1,0,0])]                   
-#    elif target[0] == 4:
-#        choice = [torch.Tensor([0,1,0]),torch.Tensor([1,0,1])]
-#    elif target[0] == 5:
-#        choice = [torch.Tensor([0,1,-0.2]),torch.Tensor([0,-1,-1])]
-#    elif target[0] == 6:
-#        choice = [torch.Tensor([0,0,0]),torch.Tensor([0,1,0])]
-#    elif target[0] == 7:
-#        choice = [torch.Tensor([0,1,0])]
-#    elif target[0] == 8:
-#        choice = [torch.Tensor([0,1,-1])]
-#    elif target[0] == 9:
-#        choice = [torch.Tensor([0,0.3,0])]
-#    elif target[0] == 10:
-#        choice = [torch.Tensor([1,3,0])]
-#    elif target[0] == 11:
-#        choice = [torch.Tensor([1,0,0]),torch.Tensor([-1,1,0])]
-#    elif target[0] == 12:
-#        choice = [torch.Tensor([-1,-1,0])]
-#    elif target[0] == 13:
-#        choice = [torch.Tensor([1,0,0])]
-#    elif target[0] == 14:
-#        choice = [torch.Tensor([1,0,1])]
-#    elif target[0] == 15:
-#        choice = [torch.Tensor([1,0,1]),torch.Tensor([0,2,0])]
     index = random.sample(choice,1)
     distance_list = []
 #    p_center  = real_point[0,0,index]
