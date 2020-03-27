@@ -50,7 +50,6 @@ USE_CUDA = True
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 point_netG = _netG(opt.num_scales,opt.each_scales_size,opt.point_scales_list,opt.crop_point_num)
 point_netD = _netlocalD(opt.crop_point_num)
-#pointcls_net = Latentfeature(opt.num_scales,opt.point_scales_list)
 cudnn.benchmark = True
 resume_epoch=0
 
@@ -127,7 +126,6 @@ criterion_PointLoss = PointLoss().to(device)
 # setup optimizer
 optimizerD = torch.optim.Adam(point_netD.parameters(), lr=0.0001,betas=(0.9, 0.999),eps=1e-05,weight_decay=opt.weight_decay)
 optimizerG = torch.optim.Adam(point_netG.parameters(), lr=0.0001,betas=(0.9, 0.999),eps=1e-05 ,weight_decay=opt.weight_decay)
-    #optimizer = torch.optim.SGD(pointcls_net.parameters(), lr=0.001, momentum=0.9)
 schedulerD = torch.optim.lr_scheduler.StepLR(optimizerD, step_size=40, gamma=0.2)
 schedulerG = torch.optim.lr_scheduler.StepLR(optimizerG, step_size=40, gamma=0.2)
 
@@ -167,16 +165,12 @@ if opt.D_choose == 1:
             real_point = torch.unsqueeze(real_point, 1)
             input_cropped1 = torch.unsqueeze(input_cropped1,1)
             p_origin = [0,0,0]
-    #        print(input_cropped1.requires_grad,real_point.requires_grad)
             if opt.cropmethod == 'random_center':
-    #            points = [x for x in range(0,opt.pnum-1)]
-    #            choice =random.sample(points,5)  
+                #Set viewpoints
                 choice = [torch.Tensor([1,0,0]),torch.Tensor([0,0,1]),torch.Tensor([1,0,1]),torch.Tensor([-1,0,0]),torch.Tensor([-1,1,0])]
-               
                 for m in range(batch_size):
-                    index = random.sample(choice,1)
+                    index = random.sample(choice,1)#Random choose one of the viewpoint
                     distance_list = []
-    #                p_center  = real_point[m,0,index]
                     p_center = index[0]
                     for n in range(opt.pnum):
                         distance_list.append(distance_squre(real_point[m,0,n],p_center))
@@ -185,8 +179,6 @@ if opt.D_choose == 1:
                     for sp in range(opt.crop_point_num):
                         input_cropped1.data[m,0,distance_order[sp][0]] = torch.FloatTensor([0,0,0])
                         real_center.data[m,0,sp] = real_point[m,0,distance_order[sp][0]]
-    #                print(real_center.size(),input_cropped1.size())
-            #label.data.resize_([batch_size,1]).fill_(real_label)
             label.resize_([batch_size,1]).fill_(real_label)
             real_point = real_point.to(device)
             real_center = real_center.to(device)
@@ -200,15 +192,11 @@ if opt.D_choose == 1:
             real_center_key1_idx = utils.farthest_point_sample(real_center,64,RAN = False)
             real_center_key1 = utils.index_points(real_center,real_center_key1_idx)
             real_center_key1 =Variable(real_center_key1,requires_grad=True)
-       
-             
+
             real_center_key2_idx = utils.farthest_point_sample(real_center,128,RAN = True)
             real_center_key2 = utils.index_points(real_center,real_center_key2_idx)
             real_center_key2 =Variable(real_center_key2,requires_grad=True)
-            
-            
-            
-            
+
             input_cropped1 = torch.squeeze(input_cropped1,1)
             input_cropped2_idx = utils.farthest_point_sample(input_cropped1,opt.point_scales_list[1],RAN = True)
             input_cropped2     = utils.index_points(input_cropped1,input_cropped2_idx)
@@ -226,17 +214,14 @@ if opt.D_choose == 1:
             # (2) Update D network
             ###########################        
             point_netD.zero_grad()
-            real_center = torch.unsqueeze(real_center,1)
-           
+            real_center = torch.unsqueeze(real_center,1)   
             output = point_netD(real_center)
-    #        print(output.requires_grad)
             errD_real = criterion(output,label)
             errD_real.backward()
             fake_center1,fake_center2,fake  =point_netG(input_cropped)
             fake = torch.unsqueeze(fake,1)
             label.data.fill_(fake_label)
             output = point_netD(fake.detach())
-    #        print(output.requires_grad)
             errD_fake = criterion(output, label)
             errD_fake.backward()
             errD = errD_real + errD_fake
@@ -245,14 +230,12 @@ if opt.D_choose == 1:
             # (3) Update G network: maximize log(D(G(z)))
             ###########################
             point_netG.zero_grad()
-    #        label.data.fill_(real_label)  # fake labels are real for generator cost
             label.data.fill_(real_label)
             output = point_netD(fake)
-    #        print(output.requires_grad)
             errG_D = criterion(output, label)
             errG_l2 = 0
             CD_LOSS = criterion_PointLoss(torch.squeeze(fake,1),torch.squeeze(real_center,1))
-            
+       
             errG_l2 = criterion_PointLoss(torch.squeeze(fake,1),torch.squeeze(real_center,1))\
             +alpha1*criterion_PointLoss(fake_center1,real_center_key1)\
             +alpha2*criterion_PointLoss(fake_center2,real_center_key2)
@@ -260,7 +243,6 @@ if opt.D_choose == 1:
             errG = (1-opt.wtl2) * errG_D + opt.wtl2 * errG_l2
             errG.backward()
             optimizerG.step()
-    #        print(real_center.requires_grad,fake.requires_grad,fake_part.requires_grad,input_cropped1.requires_grad,input_cropped2.requires_grad,input_cropped3.requires_grad)
             print('[%d/%d][%d/%d] Loss_D: %.4f Loss_G: %.4f / %.4f / %.4f/ %.4f'
                   % (epoch, opt.niter, i, len(dataloader), 
                      errD.data, errG_D.data,errG_l2,errG,CD_LOSS))
@@ -281,37 +263,26 @@ if opt.D_choose == 1:
                     real_center = torch.FloatTensor(batch_size, 1, opt.crop_point_num, 3)
                     input_cropped1 = torch.FloatTensor(batch_size, opt.pnum, 3)
                     input_cropped1 = input_cropped1.data.copy_(real_point)
-                    
-    #                input_cropped1.data.resize_(real_point.size()).copy_(real_point)
-                    
-                    
                     real_point = torch.unsqueeze(real_point, 1)
                     input_cropped1 = torch.unsqueeze(input_cropped1,1)
                     
                     p_origin = [0,0,0]
                     
                     if opt.cropmethod == 'random_center':
-    #                    points = [x for x in range(0,opt.pnum-1)]
-    #                    choice =random.sample(points,5)   
                         choice = [torch.Tensor([1,0,0]),torch.Tensor([0,0,1]),torch.Tensor([1,0,1]),torch.Tensor([-1,0,0]),torch.Tensor([-1,1,0])]
                         
                         for m in range(batch_size):
                             index = random.sample(choice,1)
                             distance_list = []
-    #                        p_center  = real_point[m,0,index] 
                             p_center = index[0]
                             for n in range(opt.pnum):
                                 distance_list.append(distance_squre(real_point[m,0,n],p_center))
-                            distance_order = sorted(enumerate(distance_list), key  = lambda x:x[1])
-                            
+                            distance_order = sorted(enumerate(distance_list), key  = lambda x:x[1])                         
                             for sp in range(opt.crop_point_num):
                                 input_cropped1.data[m,0,distance_order[sp][0]] = torch.FloatTensor([0,0,0])
                                 real_center.data[m,0,sp] = real_point[m,0,distance_order[sp][0]]  
                     real_center = real_center.to(device)
                     real_center = torch.squeeze(real_center,1)
-    #                real_center_key_idx = utils.farthest_point_sample(real_center,64,train = False)
-    #                real_center_key = utils.index_points(real_center,real_center_key_idx)
-                    
                     input_cropped1 = input_cropped1.to(device) 
                     input_cropped1 = torch.squeeze(input_cropped1,1)
                     input_cropped2_idx = utils.farthest_point_sample(input_cropped1,opt.point_scales_list[1],RAN = True)
@@ -327,7 +298,6 @@ if opt.D_choose == 1:
                     point_netG.eval()
                     fake_center1,fake_center2,fake  =point_netG(input_cropped)
                     CD_loss = criterion_PointLoss(torch.squeeze(fake,1),torch.squeeze(real_center,1))
-    #                print(real_center.requires_grad,fake.requires_grad,fake_part.requires_grad,input_cropped1.requires_grad,input_cropped2.requires_grad,input_cropped3.requires_grad)
                     print('test result:',CD_loss)
                     f.write('\n'+'test result:  %.4f'%(CD_loss))
                     break
@@ -341,8 +311,6 @@ if opt.D_choose == 1:
             torch.save({'epoch':epoch+1,
                         'state_dict':point_netD.state_dict()},
                         'Trained_Model/point_netD'+str(epoch)+'.pth' )  
-
-
 
 #
 #############################
@@ -372,15 +340,11 @@ else:
             real_point = torch.unsqueeze(real_point, 1)
             input_cropped1 = torch.unsqueeze(input_cropped1,1)
             p_origin = [0,0,0]
-    #        print(input_cropped1.requires_grad,real_point.requires_grad)
             if opt.cropmethod == 'random_center':
-    #            points = [x for x in range(0,opt.pnum-1)]
-    #            choice =random.sample(points,5)  
                 choice = [torch.Tensor([1,0,0]),torch.Tensor([0,0,1]),torch.Tensor([1,0,1]),torch.Tensor([-1,0,0]),torch.Tensor([-1,1,0])]
                 for m in range(batch_size):
                     index = random.sample(choice,1)
                     distance_list = []
-    #                p_center  = real_point[m,0,index]
                     p_center = index[0]
                     for n in range(opt.pnum):
                         distance_list.append(distance_squre(real_point[m,0,n],p_center))
@@ -389,8 +353,6 @@ else:
                     for sp in range(opt.crop_point_num):
                         input_cropped1.data[m,0,distance_order[sp][0]] = torch.FloatTensor([0,0,0])
                         real_center.data[m,0,sp] = real_point[m,0,distance_order[sp][0]]
-    #                print(real_center.size(),input_cropped1.size())
-            #label.data.resize_([batch_size,1]).fill_(real_label)
             real_point = real_point.to(device)
             real_center = real_center.to(device)
             input_cropped1 = input_cropped1.to(device)
@@ -402,14 +364,10 @@ else:
             real_center_key1_idx = utils.farthest_point_sample(real_center,64,RAN = False)
             real_center_key1 = utils.index_points(real_center,real_center_key1_idx)
             real_center_key1 =Variable(real_center_key1,requires_grad=True)
-       
-             
+
             real_center_key2_idx = utils.farthest_point_sample(real_center,128,RAN = True)
             real_center_key2 = utils.index_points(real_center,real_center_key2_idx)
             real_center_key2 =Variable(real_center_key2,requires_grad=True)
-            
-            
-            
             
             input_cropped1 = torch.squeeze(input_cropped1,1)
             input_cropped2_idx = utils.farthest_point_sample(input_cropped1,opt.point_scales_list[1],RAN = True)
@@ -429,18 +387,15 @@ else:
             ############################
             # (3) Update G network: maximize log(D(G(z)))
             ###########################
-    #        print(output.requires_grad)
             
             CD_LOSS = criterion_PointLoss(torch.squeeze(fake,1),torch.squeeze(real_center,1))
             
             errG_l2 = criterion_PointLoss(torch.squeeze(fake,1),torch.squeeze(real_center,1))\
             +alpha1*criterion_PointLoss(fake_center1,real_center_key1)\
             +alpha2*criterion_PointLoss(fake_center2,real_center_key2)
-            
-            
+
             errG_l2.backward()
             optimizerG.step()
-    #        print(real_center.requires_grad,fake.requires_grad,fake_part.requires_grad,input_cropped1.requires_grad,input_cropped2.requires_grad,input_cropped3.requires_grad)
             print('[%d/%d][%d/%d] Loss_G: %.4f / %.4f '
                   % (epoch, opt.niter, i, len(dataloader), 
                       errG_l2,CD_LOSS))
@@ -455,7 +410,7 @@ else:
         if epoch% 10 == 0:   
             torch.save({'epoch':epoch+1,
                         'state_dict':point_netG.state_dict()},
-                        'Trained_Model/point_netG'+str(epoch)+'.pth' )
+                        'Checkpoint/point_netG'+str(epoch)+'.pth' )
  
 
     
