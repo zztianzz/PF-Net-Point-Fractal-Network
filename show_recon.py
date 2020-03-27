@@ -54,10 +54,6 @@ def distance_squre1(p1,p2):
 transforms = transforms.Compose(
     [
         d_utils.PointcloudToTensor(),
-#        d_utils.PointcloudRotate(axis=np.array([1, 0, 0])),
-#        d_utils.PointcloudScale(),
-#        d_utils.PointcloudTranslate(),
-#        d_utils.PointcloudJitter(),
     ]
 )
 
@@ -88,12 +84,9 @@ for i, data in enumerate(test_dataloader, 0):
     input_cropped1.resize_(real_point.size()).copy_(real_point)
     p_origin = [0,0,0]
     
-#    points = [x for x in range(0,opt.pnum-1)]
-#    choice =random.sample(points,5)
     choice = [torch.Tensor([1,0,0]),torch.Tensor([0,0,1]),torch.Tensor([1,0,1]),torch.Tensor([-1,0,0]),torch.Tensor([-1,1,0])]
     index = random.sample(choice,1)
     distance_list = []
-#    p_center  = real_point[0,0,index]
     p_center = index[0]
     for num in range(opt.pnum):
         distance_list.append(distance_squre(real_point[0,0,num],p_center))
@@ -105,9 +98,6 @@ for i, data in enumerate(test_dataloader, 0):
     
     real_center.to(device) 
     real_center = torch.squeeze(real_center,1)
-#    real_center_key_idx = utils.farthest_point_sample(real_center,64,train = False)
-#    real_center_key = utils.index_points(real_center,real_center_key_idx)
-#    input_cropped1 = input_cropped1.to(device)
     
     input_cropped1 = torch.squeeze(input_cropped1,1)
     input_cropped2_idx = utils.farthest_point_sample(input_cropped1,opt.point_scales_list[1],RAN = True)
@@ -118,11 +108,10 @@ for i, data in enumerate(test_dataloader, 0):
     input_cropped3 = input_cropped3.to(device)      
     input_cropped  = [input_cropped1,input_cropped2,input_cropped3]
     
-#    fake,fake_part = point_netG(input_cropped)
+
     fake_center1,fake_center2,fake=point_netG(input_cropped)
     fake = fake.cuda()
     real_center = real_center.cuda()
-#    fake_part = fake_part.cuda()
     real_center =real_center.cuda()
     errG = criterion_PointLoss(torch.squeeze(fake,1),torch.squeeze(real_center,1))#+0.1*criterion_PointLoss(torch.squeeze(fake_part,1),torch.squeeze(real_center,1))
     errG = errG.cpu()
@@ -152,9 +141,6 @@ for i, data in enumerate(test_dataloader, 0):
                 pass
             else:
                 np_crop.append(np_inco[m])
-#            num_crop = np.array([[len(np_crop)]])
-        #np_ini = real_point[0,0].detach().numpy() #1024
-        #np_crop = np.
         np.savetxt('test-examples/crop'+str(n)+'.csv', np_crop, fmt = "%f,%f,%f")
         np.savetxt('test-examples/fake'+str(n)+'.csv', np_fake, fmt = "%f,%f,%f")
         np.savetxt('test-examples/real'+str(n)+'.csv', np_real, fmt = "%f,%f,%f")
