@@ -139,11 +139,11 @@ for i, data in enumerate(test_dataloader, 0):
                 pass
             else:
                 np_crop.append(np_inco[m])
-        np.savetxt('test-examples/crop'+str(n)+'.csv', np_crop, fmt = "%f,%f,%f")
-        np.savetxt('test-examples/fake'+str(n)+'.csv', np_fake, fmt = "%f,%f,%f")
-        np.savetxt('test-examples/real'+str(n)+'.csv', np_real, fmt = "%f,%f,%f")
-        np.savetxt('test-examples/crop_txt'+str(n)+'.txt', np_crop, fmt = "%f,%f,%f")
-        np.savetxt('test-examples/fake_txt'+str(n)+'.txt', np_fake, fmt = "%f,%f,%f")
-        np.savetxt('test-examples/real_txt'+str(n)+'.txt', np_real, fmt = "%f,%f,%f")    
+        np.savetxt('test-example/crop'+str(n)+'.csv', np_crop, fmt = "%f,%f,%f")
+        np.savetxt('test-example/fake'+str(n)+'.csv', np_fake, fmt = "%f,%f,%f")
+        np.savetxt('test-example/real'+str(n)+'.csv', np_real, fmt = "%f,%f,%f")
+        np.savetxt('test-example/crop_txt'+str(n)+'.txt', np_crop, fmt = "%f,%f,%f")
+        np.savetxt('test-example/fake_txt'+str(n)+'.txt', np_fake, fmt = "%f,%f,%f")
+        np.savetxt('test-example/real_txt'+str(n)+'.txt', np_real, fmt = "%f,%f,%f")    
     
     
