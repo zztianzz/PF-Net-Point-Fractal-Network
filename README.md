@@ -21,7 +21,7 @@ Change ‘point_scales_list ’to control different input resolutions.
 Change ‘D_choose’to control without using D-net.
 ##3) Evaluate the Performance on ShapeNet
 ```
-python show_FPNet.py
+python show_recon.py
 ```
 Show the completion results, the program will generate txt files in 'test-examples'.
 ```
