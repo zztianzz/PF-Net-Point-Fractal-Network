@@ -126,10 +126,8 @@ for i, data in enumerate(test_dataloader, 0):
         print(errG_min)
         fake =fake.cpu()
         np_fake = fake[0].detach().numpy()  #256
-#            num_fake = len(np_fake)
         real_center = real_center.cpu()
         np_real = real_center.data[0].detach().numpy() #256
-#            num_real = np.array([[len(np_real)]])
         input_cropped1 = input_cropped1.cpu()
         np_inco = input_cropped1[0].detach().numpy() #1024
         np_crop = []
