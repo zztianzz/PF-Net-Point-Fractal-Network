@@ -19,6 +19,7 @@ python Train_FPNet.py
 Change ‘crop_point_num’ to control the number of missing points.
 Change ‘point_scales_list ’to control different input resolutions.
 Change ‘D_choose’to control without using D-net.
+
 ##3) Evaluate the Performance on ShapeNet
 ```
 python show_recon.py
