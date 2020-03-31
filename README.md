@@ -28,6 +28,7 @@ Show the completion results, the program will generate txt files in 'test-exampl
 python show_CD.py
 ```
 Show the Chamfer Distances and two metrics in our paper.
+
 ##4) Visualization of csv File
 
 We provide some incomplete point cloud in file 'test_one'. Use the following code to complete a incomplete point cloud of csv file:
