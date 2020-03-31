@@ -36,4 +36,5 @@ python Test_csv.py
 change ‘infile’and  ‘infile_real’to select different incomplete point cloud in ‘test_one’
 
 ##5) Visualization of Examples
-Use Meshlab to visualize  the txt files.
+
+Using Meshlab to visualize  the txt files.
