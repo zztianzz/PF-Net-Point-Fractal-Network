@@ -2,7 +2,7 @@
 
 This repository is still under constructions.
 
-If you havae any questions about the code, please email me. Thanks!
+If you have any questions about the code, please email me. Thanks!
 
 This is the Pytorch implement of CVPR2020 PF-Net: Point Fractal Network for 3D Point Cloud Completion. 
 
