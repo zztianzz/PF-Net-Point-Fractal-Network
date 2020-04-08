@@ -40,6 +40,7 @@ parser.add_argument('--netD', default='', help="path to netD (to continue traini
 parser.add_argument('--manualSeed', type=int, help='manual seed')
 parser.add_argument('--drop',type=float,default=0.2)
 parser.add_argument('--num_scales',type=int,default=3,help='number of scales')
+# If you want to test your point clouds.  Set the first parameter of '--point_scales_list' equal to (point_number + 512).
 parser.add_argument('--point_scales_list',type=list,default=[2048,1024,512],help='number of points in each scales')
 parser.add_argument('--each_scales_size',type=int,default=1,help='each scales size')
 parser.add_argument('--wtl2',type=float,default=0.9,help='0 means do not use else use with this weight')
