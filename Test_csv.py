@@ -69,9 +69,9 @@ Zeros = torch.zeros(1,512,3)
 input_cropped1 = torch.cat((input_cropped1,Zeros),1)
 
 
-input_cropped2_idx = utils.farthest_point_sample(input_cropped1,1024,RAN = True)
+input_cropped2_idx = utils.farthest_point_sample(input_cropped1,opt.point_scales_list[1],RAN = True)
 input_cropped2     = utils.index_points(input_cropped1,input_cropped2_idx)
-input_cropped3_idx = utils.farthest_point_sample(input_cropped1,512,RAN = False)
+input_cropped3_idx = utils.farthest_point_sample(input_cropped1,opt.point_scales_list[2],RAN = False)
 input_cropped3     = utils.index_points(input_cropped1,input_cropped3_idx)
 input_cropped4_idx = utils.farthest_point_sample(input_cropped1,256,RAN = True)
 input_cropped4     = utils.index_points(input_cropped1,input_cropped4_idx)
