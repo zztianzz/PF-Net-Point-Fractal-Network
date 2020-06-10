@@ -10,7 +10,7 @@ import sys
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-dataset_path=os.path.abspath(os.path.join(BASE_DIR, '../dataset/shapenet_part/shapenetcore_partanno_segmentation_benchmark_v0/'))
+dataset_path=os.path.abspath(os.path.join(BASE_DIR, '../dataset/shapenetcore_partanno_segmentation_benchmark_v0/'))
 
 class PartDataset(data.Dataset):
     def __init__(self, root=dataset_path, npoints=2500, classification=False, class_choice=None, split='train', normalize=True):
