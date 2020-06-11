@@ -19,7 +19,7 @@ from utils import distance_squre
 import data_utils as d_utils
 import ModelNet40Loader
 import shapenet_part_loader
-from model_FPNet import _netlocalD,_netG
+from model_PFNet import _netlocalD,_netG
 
 
 parser = argparse.ArgumentParser()
