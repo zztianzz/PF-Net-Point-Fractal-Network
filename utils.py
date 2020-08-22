@@ -3,6 +3,7 @@
 
 import torch
 import torch.nn as nn
+import numpy
 
 def array2samples_distance(array1, array2):
     """
@@ -112,6 +113,52 @@ def farthest_point_sample(xyz, npoint,RAN = True):
         distance[mask] = dist[mask]
         farthest = torch.max(distance, -1)[1]
     return centroids
+
+
+
+# ---------------------------------------------------------------------------------------------
+def crop_points(points: torch.Tensor, num_crop_points: int, crop_method='random_center'):
+    """
+    points: the points to be cropped, [B, N, 3]
+    num_crop_points: the number of point to be cropped from origin
+    """
+    B, N, _ = points.shape
+
+    if crop_method == 'random_center':
+        center_choices = numpy.array([
+            [ 1.0, 0.0, 0.0],
+            [ 0.0, 0.0, 1.0],
+            [ 1.0, 0.0, 1.0],
+            [-1.0, 0.0, 0.0],
+            [-1.0, 1.0, 0.0],
+        ], dtype=numpy.float32)
+
+        center_indices = numpy.random.choice(len(center_choices), B)
+        p_centers = torch.from_numpy(center_choices[center_indices]).to(points.device)
+
+        distance_squred = torch.sum((points - p_centers.view(B, 1, 3))**2, dim=2, keepdim=False)  # (B, num_points)
+        _, distance_indices = torch.sort(distance_squred, descending=False, dim=1)
+
+        b = torch.arange(B).view(-1, 1)
+        idx = distance_indices[torch.arange(B), :num_crop_points]  # [B, num_crop_points]
+        inv = torch.ones((B, N)).int()  # [B, N]
+        inv[b, idx] = 0
+        inv = torch.nonzero(inv.int(), as_tuple=False)[:, 1].reshape(B, -1)
+
+        # The points that is cropped
+        points_croped = points[b, idx]  # [B, num_crop_points, 3]
+        # The remaining points after crop operation
+        # points_uncrop = points[b, inv]  # [B, N - num_crop_points, 3]
+        points_uncrop = points.clone()
+        points_uncrop[b, inv] = torch.tensor([0.0, 0.0, 0.0], dtype=torch.float32, device=points.device)
+
+    else:
+        print('Only random_center crop method is available now.')
+        quit()
+
+    return points_uncrop, points_croped
+
+
 
 if __name__=='__main__':
     a = torch.randn(64,256,3)

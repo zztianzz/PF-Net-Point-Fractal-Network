@@ -11,11 +11,11 @@ from torch.autograd import Variable
 import utils
 from utils import PointLoss
 from utils import distance_squre
+from utils import crop_points
 import data_utils as d_utils
 import ModelNet40Loader
 import shapenet_part_loader
 from model_PFNet import _netlocalD,_netG
-
 
 
 parser = argparse.ArgumentParser()
@@ -137,6 +137,7 @@ input_cropped1 = torch.FloatTensor(opt.batchSize, opt.pnum, 3)
 label = torch.FloatTensor(opt.batchSize)
 
 
+
 num_batch = len(dset) / opt.batchSize
 ###########################
 #  G-NET and T-NET
@@ -157,28 +158,10 @@ if opt.D_choose == 1:
             
             real_point, target = data
             
-    
             batch_size = real_point.size()[0]
-            real_center = torch.FloatTensor(batch_size, 1, opt.crop_point_num, 3)       
-            input_cropped1 = torch.FloatTensor(batch_size, opt.pnum, 3)
-            input_cropped1 = input_cropped1.data.copy_(real_point)
-            real_point = torch.unsqueeze(real_point, 1)
-            input_cropped1 = torch.unsqueeze(input_cropped1,1)
-            p_origin = [0,0,0]
-            if opt.cropmethod == 'random_center':
-                #Set viewpoints
-                choice = [torch.Tensor([1,0,0]),torch.Tensor([0,0,1]),torch.Tensor([1,0,1]),torch.Tensor([-1,0,0]),torch.Tensor([-1,1,0])]
-                for m in range(batch_size):
-                    index = random.sample(choice,1)#Random choose one of the viewpoint
-                    distance_list = []
-                    p_center = index[0]
-                    for n in range(opt.pnum):
-                        distance_list.append(distance_squre(real_point[m,0,n],p_center))
-                    distance_order = sorted(enumerate(distance_list), key  = lambda x:x[1])
-                    
-                    for sp in range(opt.crop_point_num):
-                        input_cropped1.data[m,0,distance_order[sp][0]] = torch.FloatTensor([0,0,0])
-                        real_center.data[m,0,sp] = real_point[m,0,distance_order[sp][0]]
+
+            input_cropped1, real_center = crop_points(real_point.to(device), opt.crop_point_num)
+
             label.resize_([batch_size,1]).fill_(real_label)
             real_point = real_point.to(device)
             real_center = real_center.to(device)
@@ -188,7 +171,7 @@ if opt.D_choose == 1:
             # (1) data prepare
             ###########################      
             real_center = Variable(real_center,requires_grad=True)
-            real_center = torch.squeeze(real_center,1)
+            # real_center = torch.squeeze(real_center,1)
             real_center_key1_idx = utils.farthest_point_sample(real_center,64,RAN = False)
             real_center_key1 = utils.index_points(real_center,real_center_key1_idx)
             real_center_key1 =Variable(real_center_key1,requires_grad=True)
@@ -197,7 +180,7 @@ if opt.D_choose == 1:
             real_center_key2 = utils.index_points(real_center,real_center_key2_idx)
             real_center_key2 =Variable(real_center_key2,requires_grad=True)
 
-            input_cropped1 = torch.squeeze(input_cropped1,1)
+            # input_cropped1 = torch.squeeze(input_cropped1,1)
             input_cropped2_idx = utils.farthest_point_sample(input_cropped1,opt.point_scales_list[1],RAN = True)
             input_cropped2     = utils.index_points(input_cropped1,input_cropped2_idx)
             input_cropped3_idx = utils.farthest_point_sample(input_cropped1,opt.point_scales_list[2],RAN = False)
@@ -258,33 +241,14 @@ if opt.D_choose == 1:
                 for i, data in enumerate(test_dataloader, 0):
                     real_point, target = data
                     
-            
+
                     batch_size = real_point.size()[0]
-                    real_center = torch.FloatTensor(batch_size, 1, opt.crop_point_num, 3)
-                    input_cropped1 = torch.FloatTensor(batch_size, opt.pnum, 3)
-                    input_cropped1 = input_cropped1.data.copy_(real_point)
-                    real_point = torch.unsqueeze(real_point, 1)
-                    input_cropped1 = torch.unsqueeze(input_cropped1,1)
                     
-                    p_origin = [0,0,0]
+                    input_cropped1, real_center = crop_points(real_point.to(device), opt.crop_point_num)
                     
-                    if opt.cropmethod == 'random_center':
-                        choice = [torch.Tensor([1,0,0]),torch.Tensor([0,0,1]),torch.Tensor([1,0,1]),torch.Tensor([-1,0,0]),torch.Tensor([-1,1,0])]
-                        
-                        for m in range(batch_size):
-                            index = random.sample(choice,1)
-                            distance_list = []
-                            p_center = index[0]
-                            for n in range(opt.pnum):
-                                distance_list.append(distance_squre(real_point[m,0,n],p_center))
-                            distance_order = sorted(enumerate(distance_list), key  = lambda x:x[1])                         
-                            for sp in range(opt.crop_point_num):
-                                input_cropped1.data[m,0,distance_order[sp][0]] = torch.FloatTensor([0,0,0])
-                                real_center.data[m,0,sp] = real_point[m,0,distance_order[sp][0]]  
                     real_center = real_center.to(device)
-                    real_center = torch.squeeze(real_center,1)
                     input_cropped1 = input_cropped1.to(device) 
-                    input_cropped1 = torch.squeeze(input_cropped1,1)
+
                     input_cropped2_idx = utils.farthest_point_sample(input_cropped1,opt.point_scales_list[1],RAN = True)
                     input_cropped2     = utils.index_points(input_cropped1,input_cropped2_idx)
                     input_cropped3_idx = utils.farthest_point_sample(input_cropped1,opt.point_scales_list[2],RAN = False)
@@ -334,25 +298,9 @@ else:
             
     
             batch_size = real_point.size()[0]
-            real_center = torch.FloatTensor(batch_size, 1, opt.crop_point_num, 3)       
-            input_cropped1 = torch.FloatTensor(batch_size, opt.pnum, 3)
-            input_cropped1 = input_cropped1.data.copy_(real_point)
-            real_point = torch.unsqueeze(real_point, 1)
-            input_cropped1 = torch.unsqueeze(input_cropped1,1)
-            p_origin = [0,0,0]
-            if opt.cropmethod == 'random_center':
-                choice = [torch.Tensor([1,0,0]),torch.Tensor([0,0,1]),torch.Tensor([1,0,1]),torch.Tensor([-1,0,0]),torch.Tensor([-1,1,0])]
-                for m in range(batch_size):
-                    index = random.sample(choice,1)
-                    distance_list = []
-                    p_center = index[0]
-                    for n in range(opt.pnum):
-                        distance_list.append(distance_squre(real_point[m,0,n],p_center))
-                    distance_order = sorted(enumerate(distance_list), key  = lambda x:x[1])
-                    
-                    for sp in range(opt.crop_point_num):
-                        input_cropped1.data[m,0,distance_order[sp][0]] = torch.FloatTensor([0,0,0])
-                        real_center.data[m,0,sp] = real_point[m,0,distance_order[sp][0]]
+
+            input_cropped1, real_center = crop_points(real_point.to(device), opt.crop_point_num)
+
             real_point = real_point.to(device)
             real_center = real_center.to(device)
             input_cropped1 = input_cropped1.to(device)
@@ -360,7 +308,6 @@ else:
             # (1) data prepare
             ###########################      
             real_center = Variable(real_center,requires_grad=True)
-            real_center = torch.squeeze(real_center,1)
             real_center_key1_idx = utils.farthest_point_sample(real_center,64,RAN = False)
             real_center_key1 = utils.index_points(real_center,real_center_key1_idx)
             real_center_key1 =Variable(real_center_key1,requires_grad=True)
@@ -369,7 +316,6 @@ else:
             real_center_key2 = utils.index_points(real_center,real_center_key2_idx)
             real_center_key2 =Variable(real_center_key2,requires_grad=True)
             
-            input_cropped1 = torch.squeeze(input_cropped1,1)
             input_cropped2_idx = utils.farthest_point_sample(input_cropped1,opt.point_scales_list[1],RAN = True)
             input_cropped2     = utils.index_points(input_cropped1,input_cropped2_idx)
             input_cropped3_idx = utils.farthest_point_sample(input_cropped1,opt.point_scales_list[2],RAN = False)
@@ -382,6 +328,7 @@ else:
             input_cropped  = [input_cropped1,input_cropped2,input_cropped3]
             point_netG = point_netG.train()
             point_netG.zero_grad()
+
             fake_center1,fake_center2,fake  =point_netG(input_cropped)
             fake = torch.unsqueeze(fake,1)
             ############################
