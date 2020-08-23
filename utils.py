@@ -141,16 +141,16 @@ def crop_points(points: torch.Tensor, num_crop_points: int, crop_method='random_
 
         b = torch.arange(B).view(-1, 1)
         idx = distance_indices[torch.arange(B), :num_crop_points]  # [B, num_crop_points]
-        inv = torch.ones((B, N)).int()  # [B, N]
-        inv[b, idx] = 0
-        inv = torch.nonzero(inv.int(), as_tuple=False)[:, 1].reshape(B, -1)
+        # inv = torch.ones((B, N)).int()  # [B, N]
+        # inv[b, idx] = 0
+        # inv = torch.nonzero(inv.int(), as_tuple=False)[:, 1].reshape(B, -1)
 
         # The points that is cropped
         points_croped = points[b, idx]  # [B, num_crop_points, 3]
         # The remaining points after crop operation
         # points_uncrop = points[b, inv]  # [B, N - num_crop_points, 3]
         points_uncrop = points.clone()
-        points_uncrop[b, inv] = torch.tensor([0.0, 0.0, 0.0], dtype=torch.float32, device=points.device)
+        points_uncrop[b, idx] = torch.tensor([0.0, 0.0, 0.0], dtype=torch.float32, device=points.device)
 
     else:
         print('Only random_center crop method is available now.')
