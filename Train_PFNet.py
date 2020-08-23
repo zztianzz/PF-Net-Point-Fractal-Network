@@ -21,7 +21,7 @@ from model_PFNet import _netlocalD,_netG
 parser = argparse.ArgumentParser()
 parser.add_argument('--dataroot',  default='dataset/train', help='path to dataset')
 parser.add_argument('--workers', type=int,default=2, help='number of data loading workers')
-parser.add_argument('--batchSize', type=int, default=16, help='input batch size')
+parser.add_argument('--batchSize', type=int, default=24, help='input batch size')
 parser.add_argument('--pnum', type=int, default=2048, help='the point number of a sample')
 parser.add_argument('--crop_point_num',type=int,default=512,help='0 means do not use else use with this weight')
 parser.add_argument('--nc', type=int, default=3)
