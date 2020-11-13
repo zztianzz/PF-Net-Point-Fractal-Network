@@ -16,6 +16,7 @@ Python 3.7.4
 ```
   cd dataset
   bash download_shapenet_part16_catagories.sh
+  You can also download the dataset from 链接：https://pan.baidu.com/s/1MavAO_GHa0a6BZh4Oaogug 提取码：3hoe 
 ```
 ##2) Train
 ```
