@@ -6,7 +6,7 @@ If you have any questions about the code, please email me. Thanks!
 
 This is the Pytorch implement of CVPR2020 PF-Net: Point Fractal Network for 3D Point Cloud Completion. 
 
-https://arxiv.org/abs/2003.00410
+https://openaccess.thecvf.com/content_CVPR_2020/papers/Huang_PF-Net_Point_Fractal_Network_for_3D_Point_Cloud_Completion_CVPR_2020_paper.pdf
 
 ##0) Environment
 Pytorch 1.0.1
